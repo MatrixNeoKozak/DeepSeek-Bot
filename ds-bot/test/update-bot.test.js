@@ -95,3 +95,14 @@ test('every Bot sees the update_bot rule in its identity section', async (t) => 
   assert.match(text, /update_bot changes your own settings/)
   assert.match(ctx.sections.get('bot-identity').text({ agent: { id: 'm1' } }), /update_bot changes your own settings/)
 })
+
+test('__proto__ and constructor cannot be treated as bots or rooms', async (t) => {
+  const { ctx, tool, stop } = start()
+  t.after(stop)
+  await tool('list_bots', {}, 'm1')
+  assert.equal(ctx.rt.botOf('__proto__'), undefined)
+  assert.equal(ctx.rt.roomOf('__proto__'), undefined)
+  assert.equal(ctx.rt.findBot('__proto__'), undefined)
+  assert.equal(ctx.rt.findRooms('__proto__').length, 0)
+  assert.equal(Object.prototype.role, undefined)
+})

@@ -313,9 +313,9 @@ export function install(rt) {
     return writing.finally(() => lock.release())
   }, 'ds-bot: state lock')
 
-  const botOf = id => (id === undefined ? undefined : state.bots[id])
-  const roomOf = id => (id === undefined ? undefined : state.rooms[id])
-  const isMain = id => id !== undefined && state.mainBotIds.includes(id)
+  const botOf = id => (id === undefined ? undefined : Object.hasOwn(state.bots, id) ? state.bots[id] : undefined)
+  const roomOf = id => (id === undefined ? undefined : Object.hasOwn(state.rooms, id) ? state.rooms[id] : undefined)
+  const isMain = id => id !== undefined && Object.hasOwn(state.bots, id) && state.mainBotIds.includes(id)
 
   // Group Sessions. A member speaks in each group from a hidden Session of its own,
   // `room.sessions[botId]`, that renders the same system prompt and tools as its own
@@ -380,14 +380,14 @@ export function install(rt) {
   }
   const findBot = (ref) => {
     if (ref === undefined) return undefined
-    if (state.bots[ref]) return state.bots[ref]
+    if (Object.hasOwn(state.bots, ref)) return state.bots[ref]
     const wanted = normalize(ref).replace(/^@/, '')
     return Object.values(state.bots).find(bot => normalize(bot.name) === wanted)
   }
   // Every group chat whose id or name matches; callers refuse an ambiguous name.
   const findRooms = (ref) => {
     if (ref === undefined || ref === null) return []
-    if (state.rooms[ref]) return [state.rooms[ref]]
+    if (Object.hasOwn(state.rooms, ref)) return [state.rooms[ref]]
     const wanted = normalize(unquote(ref))
     return Object.values(state.rooms).filter(room => normalize(room.name) === wanted)
   }
